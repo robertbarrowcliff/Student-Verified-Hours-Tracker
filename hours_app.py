@@ -193,16 +193,19 @@ if uploaded_file:
         filtered_df = filtered_df[
             filtered_df["Student Name"].str.contains(search_name, case=False, na=False)
         ]
-if show_zero_hours:
-    filtered_df = filtered_df[filtered_df["Total Hours"] == 0]
 
-elif show_verified and not show_unverified:
-    filtered_df = filtered_df[filtered_df["Verified"] == "Yes"]
+    if show_zero_hours:
+        filtered_df = filtered_df[filtered_df["Total Hours"] == 0]
 
-elif show_unverified and not show_verified:
-    filtered_df = filtered_df[filtered_df["Verified"] == "No"]
+    elif show_verified and not show_unverified:
+        filtered_df = filtered_df[filtered_df["Verified"] == "Yes"]
+
+    elif show_unverified and not show_verified:
+        filtered_df = filtered_df[filtered_df["Verified"] == "No"]
 
     display_df = filtered_df.copy()
+
+
 
     for col in ["Total Hours", "Verified Hours", "Unverified Hours"]:
         if col in display_df.columns:
