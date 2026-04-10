@@ -118,10 +118,20 @@ if uploaded_file:
             "Unverified Hours": "sum"
         })
     )
+    # --- Updated status logic ---
+    def determine_status(row):
+        if row["Total Hours"] == 0:
+            return "No Hours Recorded"
+        elif row["Unverified Hours"] == 0:
+            return "Yes"
+        else:
+            return "No"
+
     student_totals["All Hours Verified"] = student_totals.apply(
-        lambda x: "Yes" if x["Unverified Hours"] == 0 else "No",
+        determine_status,
         axis=1
     )
+
 
     # --- Display ---
     st.subheader("Hours Overview")
@@ -147,9 +157,12 @@ if uploaded_file:
     st.subheader("Total Hours per Student")
     def highlight_totals(row):
         if row["All Hours Verified"] == "Yes":
-            return ["background-color: #d4edda"] * len(row)
+            return ["background-color: #d4edda"] * len(row)  # green
+        elif row["All Hours Verified"] == "No":
+            return ["background-color: #f8d7da"] * len(row)  # red
         else:
-            return ["background-color: #f8d7da"] * len(row)
+            return ["background-color: #fff3cd"] * len(row)  # amber (no hours)
+
     totals_display = student_totals.copy()
 
     for col in ["Total Hours", "Verified Hours", "Unverified Hours"]:
