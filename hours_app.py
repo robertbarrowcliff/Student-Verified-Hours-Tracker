@@ -184,6 +184,7 @@ if uploaded_file:
 
     show_verified = st.checkbox("Show Verified Only")
     show_unverified = st.checkbox("Show Unverified Only")
+    show_zero_hours = st.checkbox("Show Zero Hours Only")
 
     filtered_df = result_df.copy()
 
