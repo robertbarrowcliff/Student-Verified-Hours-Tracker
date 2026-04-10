@@ -207,6 +207,7 @@ if uploaded_file:
 
 
 
+
     for col in ["Total Hours", "Verified Hours", "Unverified Hours"]:
         if col in display_df.columns:
             display_df[col] = display_df[col].map(
