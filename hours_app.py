@@ -24,6 +24,7 @@ if uploaded_file:
     # --- Identify columns ---
     name_col = find_col("Respondent")
     placement_col = find_col("Response")
+    response_date_col = find_col("Response date")
     verification_cols = [
         c for c in df.columns
         if "verification of hours" in c.lower()
@@ -89,12 +90,29 @@ if uploaded_file:
         else:
             verified = "No"
 
+        # --- Safeguard for known spreadsheet issue ---
+        manual_check = False
+
+        if response_date_col:
+            response_date = row[response_date_col]
+
+            if pd.notna(response_date):
+                response_text = str(response_date).strip()
+
+                if (
+                    response_text == "01/01/0001 00:00:00"
+                    and round(total_hours, 2) == 0
+                ):
+                    manual_check = True
+
         output.append({
             "Student Name": name,
             "Placement": placement,
             "Total Hours": round(total_hours, 2),
-            "Verified": verified
+            "Verified": verified,
+            "Manual Check": "Yes" if manual_check else ""
         })
+
 
     result_df = pd.DataFrame(output)
     # --- Add numeric columns for splitting ---
@@ -115,12 +133,17 @@ if uploaded_file:
         .agg({
             "Total Hours": "sum",
             "Verified Hours": "sum",
-            "Unverified Hours": "sum"
+            "Unverified Hours": "sum",
+            "Manual Check": lambda x: "Yes" if "Yes" in x.values else ""
         })
     )
     # --- Updated status logic ---
     def determine_status(row):
-        if row["Total Hours"] == 0:
+        if row.get("Manual Check") == "Yes":
+            return "Manual Check Required"
+
+        elif row["Total Hours"] == 0:
+
             return "No Hours Recorded"
         elif row["Unverified Hours"] == 0:
             return "Yes"
@@ -160,6 +183,10 @@ if uploaded_file:
             return ["background-color: #d4edda"] * len(row)  # green
         elif row["All Hours Verified"] == "No":
             return ["background-color: #f8d7da"] * len(row)  # red
+
+        elif row["All Hours Verified"] == "Manual Check Required":
+            return ["background-color: #ffe5b4"] * len(row)  # orange
+
         else:
             return ["background-color: #fff3cd"] * len(row)  # amber (no hours)
 
